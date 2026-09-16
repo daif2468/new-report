@@ -26,14 +26,6 @@
         'report/report_saleorder_delivery.xml',
         'report/report_saleorder_internal_ref.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'new_reports/static/src/css/report_fonts.css',
-        ],
-        'web.report_assets_common': [
-            'new_reports/static/src/css/report_fonts.css',
-        ],
-    },
     'installable': True,
     'application': True,
     'license': 'AGPL-3',
