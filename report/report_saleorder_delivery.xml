@@ -50,7 +50,7 @@
         <record id="action_report_saleorder_Delivery" model="ir.actions.report">
             <field name="name">Delivery Order - Internal Reference</field><field name="model">sale.order</field><field name="report_type">qweb-pdf</field>
             <field name="report_name">new_reports.report_saleorder_Delivery</field><field name="report_file">new_reports.report_saleorder_Delivery</field>
-            <field name="paperformat_id" ref="new_reports.paperformat_a4_report"/><field name="print_report_name">'De - %s' % (object.name)</field>
+            <field name="paperformat_id" ref="base.paperformat_euro"/><field name="print_report_name">'De - %s' % (object.name)</field>
             <field name="binding_model_id" ref="sale.model_sale_order"/><field name="binding_type">report</field>
         </record>
     </data>
