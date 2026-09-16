@@ -57,27 +57,31 @@
                             </t>
                         </tbody>
                     </table>
-                    <t t-set="delivered_untaxed" t-value="0.0"/>
-                    <t t-set="delivered_tax" t-value="0.0"/>
-                    <t t-set="delivered_total" t-value="0.0"/>
-                    <t t-foreach="doc.order_line" t-as="line">
-                        <t t-if="line.qty_delivered &gt; 0">
-                            <t t-set="line_total" t-value="line.qty_delivered * line.price_unit * (1 - line.discount / 100)"/>
-                            <t t-set="tax_rate" t-value="sum(line.tax_id.mapped('amount'))"/>
-                            <t t-set="line_subtotal" t-value="line_total / (1 + tax_rate / 100) if tax_rate else line_total"/>
-                            <t t-set="line_tax" t-value="line_total - line_subtotal"/>
-                            <t t-set="delivered_untaxed" t-value="delivered_untaxed + line_subtotal"/>
-                            <t t-set="delivered_tax" t-value="delivered_tax + line_tax"/>
-                            <t t-set="delivered_total" t-value="delivered_total + line_total"/>
-                        </t>
-                    </t>
+
                     <div class="row mt-3">
-                        <div class="col-7"/><div class="col-5"><table class="table table-sm table-borderless">
-                            <tr><td><strong>Total UnTax</strong></td><td class="text-end"><strong><span t-esc="round(delivered_untaxed, 1)"/></strong></td></tr>
-                            <tr><td><strong>Tax</strong></td><td class="text-end"><strong><span t-esc="round(delivered_tax, 1)"/></strong></td></tr>
-                            <tr><td><strong>Total</strong></td><td class="text-end"><strong><span t-esc="round(delivered_total, 1)"/></strong></td></tr>
-                        </table></div>
+                        <div class="col-7"/>
+                        <div class="col-5">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td><strong>Delivered Quantity</strong></td>
+                                    <td class="text-end"><strong><span t-esc="doc.total_delivered_no_discount"/></strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Amount Before Discount</strong></td>
+                                    <td class="text-end"><strong><span t-field="doc.amount_before_discount"/></strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Discount</strong></td>
+                                    <td class="text-end"><strong><span t-field="doc.amount_discount"/></strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-end"><strong><span t-field="doc.amount_total"/></strong></td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
+
                     <t t-if="doc.note"><div class="mt-4" style="direction:rtl; text-align:right; font-family:'Scheherazade New';"><strong>Notes</strong><div t-field="doc.note"/></div></t>
                 </div>
             </t>
