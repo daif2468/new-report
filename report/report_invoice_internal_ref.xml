@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="report_invoice_internal_ref">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="new_reports.report_invoice_internal_ref_document"/>
+                </t>
+            </t>
+        </template>
+
+        <!-- Actual document template -->
+        <template id="report_invoice_internal_ref_document">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Invoice : <span t-field="doc.partner_id"/> </h2>
+
+                    <div class="row mb-4" id="informations">
+                        <div t-if="doc.invoice_origin" class="col-8" >
+                            <strong>Source</strong>
+                            <div t-field="doc.invoice_origin" style="font-size:18px; font-family: 'Scheherazade New'; font-weight:bold;"></div>
+
+                            <div t-if="doc.delivery_notes">
+                                <strong>Delivery Notes</strong>
+                                <div t-field="doc.delivery_notes"/>
+                            </div>
+                        </div>
+                        <div t-if="doc.delivery_date" class="col">
+                            <strong>Invoice Date</strong>
+                            <div t-field="doc.delivery_date"/>
+                        </div>
+                        <div t-if="doc.user_id.name" class="col">
+                            <strong>Salesperson</strong>
+                            <div t-field="doc.user_id">Mitchell Admin</div>
+                        </div>
+                        <div t-if="doc.source_id" class="col">
+                            <strong>Source</strong>
+                            <div t-field="doc.source_id">Mitchell Admin</div>
+                        </div>
+                    </div>
+
+                    <t t-set="show_discount" t-value="any(line.discount for line in doc.invoice_line_ids)"/>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ID</th>
+                                <th>Description</th>
+                                <th>QTY</th>
+                                <th>U.Price</th>
+                                <th t-if="show_discount">Dis%</th>
+                                <th>Total</th>
+                                <th>Internal Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.invoice_line_ids" t-as="line">
+                                <tr t-att-style="'background-color: #E4E4E4;' if line_index % 2 == 0 else 'background-color: #ffffff;'">
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="line_index + 1"/>
+                                    </td>
+                                    <td style="text-align:left; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="line.product_id.default_code"/>
+                                    </td>
+                                   <td name="td_name" style="direction:rtl; text-align:right; vertical-align:middle;">
+                                        <span
+                                            style="font-size:12px; font-family:'Scheherazade New'; font-weight:bold;"
+                                            t-esc="line.product_id.display_name.replace('[' + (line.product_id.default_code or '') + '] ', '')"/>
+
+                                        <t t-if="line.name and line.name != line.product_id.display_name">
+                                            <br/>
+                                            <span
+                                                style="font-size:11px; font-family:'Scheherazade New';"
+                                                t-esc="line.name"/>
+                                        </t>                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="'%g' % line.quantity"/>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-field="line.price_unit"/>
+                                    </td>
+                                    <td t-if="show_discount" style="text-align:center; vertical-align:middle; font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;">
+                                        <span t-esc="'%g' % line.discount"/>%
+                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-field="line.price_total"/>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <t t-if="line.product_id.default_code">
+                                        <span t-field="line.product_id.default_code" t-options="{'widget': 'barcode', 'width': 800, 'height': 200, 'img_style': 'width:180px;height:40px'}"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    <div class="row mt-3">
+                        <div class="col-7"/>
+
+                        <div class="col-5">
+                            <table class="table table-sm table-borderless">
+
+                                <tr>
+                                    <td><strong>Total UnTax</strong></td>
+                                    <td class="text-end">
+                                        <strong t-field="doc.amount_untaxed"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Tax</strong></td>
+                                    <td class="text-end">
+                                        <strong t-field="doc.amount_tax"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-end">
+                                        <strong t-field="doc.amount_total"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- Report Action for Internal Reference -->
+        <record id="action_report_invoice_internal_ref" model="ir.actions.report">
+            <field name="name">Invoice PDF</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">new_reports.report_invoice_internal_ref</field>
+            <field name="report_file">new_reports.report_invoice_internal_ref</field>
+            <field name="paperformat_id" ref="new_reports.paperformat_a4_report"/>
+            <field name="print_report_name">'IN - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_type">report</field>
+        </record>
+
+    </data>
+</odoo>

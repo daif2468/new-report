@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Wrapper template that iterates over docs -->
+        <template id="report_saleorder_barcode">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="new_reports.report_saleorder_barcode_document"/>
+                </t>
+            </t>
+        </template>
+
+        <!-- Actual document template -->
+        <template id="report_saleorder_barcode_document">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Sale Order : <span t-field="doc.name"/> </h2>
+
+                    <div class="row mb-4" id="informations">
+                        <div t-if="doc.name" class="col-8" name="informations_reference">
+                            <strong>Customer</strong>
+                            <div t-field="doc.partner_id">Mitchell Admin</div>
+
+                            <div t-if="doc.delivery_notes">
+                                <strong style="font-size:15px; font-family: 'Scheherazade New'; font-weight:bold;">Delivery Notes</strong>
+                                <div t-field="doc.delivery_notes"/>
+                            </div>
+                        </div>
+                        <div t-if="doc.date_order" class="col" name="informations_date">
+                            <strong t-if="is_proforma">Issued Date</strong>
+                            <strong t-elif="doc.state in ['draft', 'sent']">Quotation Date</strong>
+                            <strong t-else="">Order Date</strong>
+                            <div t-field="doc.date_order" t-options="{&quot;widget&quot;: &quot;date&quot;}">2023-12-31</div>
+                        </div>
+                        <div t-if="doc.user_id.name" class="col">
+                            <strong>Salesperson</strong>
+                            <div t-field="doc.user_id">Mitchell Admin</div>
+                        </div>
+                    </div>
+
+                    <t t-set="show_discount" t-value="any(line.discount for line in doc.order_line)"/>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Barcode</th>
+                                <th>Description</th>
+                                <th>QTY</th>
+                                <th>U.Price</th>
+                                <th t-if="show_discount">Dis%</th>
+                                <th>Total</th>
+                                <th>Barcode</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.order_line" t-as="line">
+                                <t t-if="line.qty_delivered &gt; 0">
+                                <tr t-att-style="'background-color: #E4E4E4;' if line_index % 2 == 0 else 'background-color: #ffffff;'">
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="line_index + 1"/>
+                                    </td>
+                                    <td style="text-align:left; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="line.product_id.barcode"/>
+                                    </td>
+                                   <td name="td_name" style="direction:rtl; text-align:right; vertical-align:middle;">
+                                        <span style="font-size:12px; font-family:'Scheherazade New'; font-weight:bold;" t-esc="line.product_id.display_name.replace('[' + (line.product_id.default_code or '') + '] ', '')"/>
+
+                                        <t t-if="line.name and line.name != line.product_id.display_name">
+                                            <br/>
+                                            <span style="font-size:11px; font-family:'Scheherazade New';" t-esc="line.name"/>
+                                        </t>                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="'%g' % line.qty_delivered"/>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-field="line.price_unit"/>
+                                    </td>
+                                    <td t-if="show_discount" style="text-align:center; vertical-align:middle; font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;">
+                                        <span t-esc="'%g' % line.discount"/>%
+                                    </td>
+                                    <td style="text-align:center; vertical-align:middle; font-size:14px; font-family:'Scheherazade New'; font-weight:bold;">
+                                        <span t-esc="line.qty_delivered * line.price_unit * (1 - line.discount / 100)"/> </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <t t-if="line.product_id.barcode">
+                                        <span t-field="line.product_id.barcode" t-options="{'widget': 'barcode', 'width': 800, 'height': 200, 'img_style': 'width:180px;height:40px'}"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                </t>
+                            </t>
+                        </tbody>
+
+                    </table>
+
+                    <!-- Calculate totals based on delivered quantity -->
+                    <t t-set="delivered_untaxed" t-value="0.0"/>
+                    <t t-set="delivered_tax" t-value="0.0"/>
+                    <t t-set="delivered_total" t-value="0.0"/>
+
+                    <t t-foreach="doc.order_line" t-as="line">
+
+                        <!-- Total line including tax, based on delivered quantity -->
+                        <t t-set="line_total" t-value="line.qty_delivered * line.price_unit * (1 - line.discount / 100)"/>
+
+                        <!-- Tax percentage -->
+                        <t t-set="tax_rate" t-value="sum(line.tax_id.mapped('amount'))"/>
+
+                        <!-- Calculate untaxed amount from tax-included price -->
+                        <t t-set="line_subtotal" t-value="line_total / (1 + tax_rate / 100) if tax_rate else line_total"/>
+
+                        <!-- Calculate tax -->
+                        <t t-set="line_tax" t-value="line_total - line_subtotal"/>
+
+                        <!-- Add to totals -->
+                        <t t-set="delivered_untaxed" t-value="delivered_untaxed + line_subtotal"/>
+
+                        <t t-set="delivered_tax" t-value="delivered_tax + line_tax"/>
+
+                        <t t-set="delivered_total" t-value="delivered_total + line_total"/>
+
+                    </t>
+
+
+                    <!-- Totals -->
+                    <div class="row mt-3">
+
+                        <div class="col-7"/>
+
+                        <div class="col-5">
+
+                            <table class="table table-sm table-borderless">
+
+                                <!-- Total Untaxed -->
+                                <tr>
+                                    <td>
+                                        <strong>Total UnTax</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>
+                                            <span t-esc="round(delivered_untaxed, 1)"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+
+                                <!-- Tax -->
+                                <tr>
+                                    <td>
+                                        <strong>Tax</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>
+                                            <span t-esc="round(delivered_tax, 1)"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+
+                                <!-- Total Including Tax -->
+                                <tr>
+                                    <td>
+                                        <strong>Total</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>
+                                            <span t-esc="round(delivered_total, 1)"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </t>
+        </template>
+
+        <!-- Report Action for Barcode -->
+        <record id="action_report_saleorder_barcode" model="ir.actions.report">
+            <field name="name">Sale Order - Barcode</field>
+            <field name="model">sale.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">new_reports.report_saleorder_barcode</field>
+            <field name="report_file">new_reports.report_saleorder_barcode</field>
+            <field name="paperformat_id" ref="new_reports.paperformat_a4_report"/>
+            <field name="print_report_name">'SO - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="binding_type">report</field>
+        </record>
+
+    </data>
+</odoo>

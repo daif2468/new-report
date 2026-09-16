@@ -1,0 +1,41 @@
+```po
+# Translation of Odoo Server.
+# This file contains the translation of the following module:
+#   * new_reports
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Language: ar\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. module: new_reports
+#: model:ir.model.fields,field_description:new_reports.field_sale_order__total_qty_no_discount
+msgid "Total Qty (No Discount)"
+msgstr "إجمالي الكمية (بدون خصم)"
+
+#. module: new_reports
+#: model:ir.model.fields,field_description:new_reports.field_sale_order__total_delivered_no_discount
+msgid "Total Delivered (No Discount)"
+msgstr "إجمالي الكمية المسلّمة (بدون خصم)"
+
+#. module: new_reports
+#: model:ir.model.fields,field_description:new_reports.field_sale_order__amount_before_discount
+#: model:ir.model.fields,field_description:new_reports.field_account_move__amount_before_discount
+msgid "Total Before Discount"
+msgstr "الإجمالي قبل الخصم"
+
+#. module: new_reports
+#: model:ir.model.fields,field_description:new_reports.field_sale_order__amount_discount
+#: model:ir.model.fields,field_description:new_reports.field_account_move__amount_discount
+msgid "Discount Amount"
+msgstr "قيمة الخصم"
+
+#. module: new_reports
+#: model:ir.model.fields,field_description:new_reports.field_sale_order__delivery_notes
+#: model:ir.model.fields,field_description:new_reports.field_account_move__delivery_notes
+#: model:ir.model.fields,field_description:new_reports.field_stock_picking__delivery_notes
+msgid "Delivery Notes"
+msgstr "ملاحظات التسليم"
+```

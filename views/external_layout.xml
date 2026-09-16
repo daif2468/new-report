@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="external_layout_bubble_custom"
+              inherit_id="web.external_layout_bubble">
+        <xpath expr="//div[contains(@t-attf-class,'header')]" position="replace"/>
+        <xpath expr="//div[contains(@t-attf-class,'footer')]/*[local-name()='svg']" position="replace"/>
+        <xpath expr="//div[contains(@t-attf-class,'footer')]//div[hasclass('border-top')]" position="replace"/>
+<!--        <xpath expr="//div[contains(@t-attf-class,'article')]" position="attributes">
+            <attribute name="style" add="margin-top:0 !important; padding-top:0 !important;" separator=";"/>
+        </xpath> -->
+    </template>
+</odoo>

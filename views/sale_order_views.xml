@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+
+        <record id="view_order_form_custom_fields" model="ir.ui.view">
+            <field name="name">sale.order.form.custom.fields</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+
+            <field name="arch" type="xml">
+
+                <!-- Delivery Notes after Customer -->
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="delivery_notes"
+                           placeholder="Enter delivery notes here..."/>
+                </xpath>
+
+
+                <!-- Quantity Totals after Order Lines -->
+                <xpath expr="//field[@name='order_line']" position="after">
+
+                    <group class="oe_subtotal_footer" colspan="2">
+
+                        <field name="total_qty_no_discount"/>
+
+                        <field name="total_delivered_no_discount"/>
+
+                    </group>
+
+                </xpath>
+
+
+                <!-- Amount Before Discount + Discount -->
+                <xpath expr="//group[@name='sale_total']/field[@name='tax_totals']"
+                       position="before">
+
+                    <div class="d-flex justify-content-end align-items-center mb-1">
+                        <span class="me-2 text-nowrap">
+                            Amount Before :
+                        </span>
+
+                        <field name="amount_before_discount"
+                               widget="monetary"
+                               readonly="1"
+                               class="oe_inline"/>
+                    </div>
+
+                    <div class="d-flex justify-content-end align-items-center mb-1">
+                        <span class="me-2 text-nowrap">
+                            Discount :
+                        </span>
+
+                        <field name="amount_discount"
+                               widget="monetary"
+                               readonly="1"
+                               class="oe_inline"/>
+                    </div>
+
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

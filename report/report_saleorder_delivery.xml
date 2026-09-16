@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="report_saleorder_Delivery">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="new_reports.report_saleorder_Delivery_document"/>
+                </t>
+            </t>
+        </template>
+
+        <!-- Actual document template -->
+        <template id="report_saleorder_Delivery_document">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Delivery Order : <span t-field="doc.name"/> </h2>
+
+                    <div class="row mb-4" id="informations">
+                        <div t-if="doc.name" class="col-8" name="informations_reference">
+                            <strong>Customer</strong>
+                            <div t-field="doc.partner_id">Mitchell Admin</div>
+
+                            <div t-if="doc.delivery_notes" style="font-size:15px; font-family: 'Scheherazade New'; font-weight:bold;">
+                                <strong>Delivery Notes</strong>
+                                <div t-field="doc.delivery_notes"/>
+                            </div>
+                        </div>
+                        <div t-if="doc.date_order" class="col" name="informations_date">
+                            <strong t-if="is_proforma">Issued Date</strong>
+                            <strong t-elif="doc.state in ['draft', 'sent']">Quotation Date</strong>
+                            <strong t-else="">Order Date</strong>
+                            <div t-field="doc.date_order" t-options="{&quot;widget&quot;: &quot;date&quot;}">2023-12-31</div>
+                        </div>
+                        <div t-if="doc.user_id.name" class="col">
+                            <strong>Salesperson</strong>
+                            <div t-field="doc.user_id">Mitchell Admin</div>
+                        </div>
+                    </div>
+
+                    <t t-set="show_discount" t-value="any(line.discount for line in doc.order_line)"/>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ID</th>
+                                <th>Description</th>
+                                <th>QTY</th>
+                                <th>Internal Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.order_line" t-as="line">
+                                <tr t-att-style="'background-color: #E4E4E4;' if line_index % 2 == 0 else 'background-color: #ffffff;'">
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="line_index + 1"/>
+                                    </td>
+                                    <td style="text-align:left; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="line.product_id.default_code"/>
+                                    </td>
+                                   <td name="td_name" style="direction:rtl; text-align:right;">
+                                        <span
+                                            style="font-size:12px; font-family:'Scheherazade New'; font-weight:bold;"
+                                            t-esc="line.product_id.display_name.replace('[' + (line.product_id.default_code or '') + '] ', '')"/>
+
+                                        <t t-if="line.name and line.name != line.product_id.display_name">
+                                            <br/>
+                                            <span
+                                                style="font-size:11px; font-family:'Scheherazade New';"
+                                                t-esc="line.name"/>
+                                        </t>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span style="font-size:14px; font-family: 'Scheherazade New'; font-weight:bold;" t-esc="'%g' % line.product_uom_qty"/>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <t t-if="line.product_id.default_code">
+                                        <span t-field="line.product_id.default_code" t-options="{'widget': 'barcode', 'width': 800, 'height': 200, 'img_style': 'width:200px;height:40px'}"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </template>
+
+        <!-- Report Action for Internal Reference -->
+        <record id="action_report_saleorder_Delivery" model="ir.actions.report">
+            <field name="name">Delivery Order - Internal Reference</field>
+            <field name="model">sale.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">new_reports.report_saleorder_Delivery</field>
+            <field name="report_file">new_reports.report_saleorder_Delivery</field>
+            <field name="paperformat_id" ref="new_reports.paperformat_a4_report"/>
+            <field name="print_report_name">'De - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="binding_type">report</field>
+        </record>
+
+    </data>
+</odoo>
